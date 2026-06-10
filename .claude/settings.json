@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php migrate.php status)",
+      "Bash(php migrate.php run)",
+      "Bash(php set_admin_password.php)",
+      "Bash(php -l participants.php)",
+      "Bash(php -l get_participant.php)",
+      "Bash(php -r 'require '\\\\''db.php'\\\\''; $count = $pdo->query\\('\\\\''SELECT COUNT\\(*\\) FROM participants'\\\\''\\)->fetchColumn\\(\\); echo \"Participants count: $count\\\\n\"; $workshop = $pdo->query\\('\\\\''SELECT id FROM workshops LIMIT 1'\\\\''\\)->fetch\\(\\); if \\(!$workshop\\) { echo \"No workshops found. Creating test workshop...\\\\n\"; $pdo->query\\(\"INSERT INTO workshops \\(title, date, location\\) VALUES \\('\\\\''Test Workshop 2025'\\\\'', '\\\\''2025-06-15'\\\\'', '\\\\''Islamabad'\\\\''\\)\"\\); echo \"Workshop created with ID: \" . $pdo->lastInsertId\\(\\) . \"\\\\n\"; }')",
+      "Bash(php -r 'require '\\\\''db.php'\\\\''; $stmt = $pdo->query\\('\\\\''SELECT id, name, email FROM participants LIMIT 1'\\\\''\\); $p = $stmt->fetch\\(\\); if \\($p\\) { echo \"Test participant found:\\\\n\"; echo \"ID: \" . $p['\\\\''id'\\\\''] . \"\\\\n\"; echo \"Name: \" . $p['\\\\''name'\\\\''] . \"\\\\n\"; echo \"Email: \" . $p['\\\\''email'\\\\''] . \"\\\\n\"; } else { echo \"No participants found for testing\\\\n\"; }')",
+      "Bash(php -r 'require '\\\\''db.php'\\\\''; $_GET['\\\\''id'\\\\''] = '\\\\''1'\\\\''; ob_start\\(\\); include '\\\\''get_participant.php'\\\\''; $response = ob_get_clean\\(\\); echo \"AJAX Response:\\\\n\"; echo $response . \"\\\\n\";')",
+      "Bash(php -l participant_view.php)",
+      "Bash(php -r 'require '\\\\''db.php'\\\\''; $stmt = $pdo->query\\('\\\\''SELECT id, name FROM participants LIMIT 5'\\\\''\\); $participants = $stmt->fetchAll\\(\\); echo \"Test participants found:\\\\n\"; foreach \\($participants as $p\\) { echo \"ID: {$p['\\\\''id'\\\\'']} - Name: {$p['\\\\''name'\\\\'']}\\\\n\"; }')",
+      "Bash(php -l users.php)",
+      "Bash(php -l user_view.php)",
+      "Bash(php -r 'require '\\\\''db.php'\\\\''; $stmt = $pdo->query\\('\\\\''SELECT id, name, email FROM users LIMIT 5'\\\\''\\); $users = $stmt->fetchAll\\(\\); echo \"Test users found:\\\\n\"; foreach \\($users as $u\\) { echo \"ID: {$u['\\\\''id'\\\\'']} - Name: {$u['\\\\''name'\\\\'']} - Email: {$u['\\\\''email'\\\\'']}\\\\n\"; }')"
+    ]
+  }
+}
