@@ -3,7 +3,7 @@ $page='participants';
 require_once __DIR__.'/db.php';
 auth_require_module('participants');
 $id = (int)($_GET['id'] ?? 0);
-$p = ['id'=>0,'name'=>'','designation'=>'','workshop_id'=>'','province'=>'','contact'=>'','email'=>'','gender'=>'Female','attended'=>1,'photo'=>''];
+$p = ['id'=>0,'name'=>'','designation'=>'','organization'=>'','teaching_exp'=>'','qualification'=>'','age'=>'','workshop_id'=>'','province'=>'','contact'=>'','email'=>'','gender'=>'Female','attended'=>1,'photo'=>''];
 if($id){
   $st=$pdo->prepare("SELECT * FROM participants WHERE id=?"); $st->execute([$id]);
   $p = $st->fetch() ?: $p;
@@ -12,11 +12,15 @@ if($id){
 if($_SERVER['REQUEST_METHOD']==='POST'){
   $data=[
     'name'=>trim($_POST['name']),
-    'designation'=>trim($_POST['designation']),
+    'designation'=>trim($_POST['designation'] ?: ''),
+    'organization'=>trim($_POST['organization'] ?: ''),
+    'teaching_exp'=>trim($_POST['teaching_exp'] ?: ''),
+    'qualification'=>trim($_POST['qualification'] ?: ''),
+    'age'=>trim($_POST['age'] ?: ''),
     'workshop_id'=>$_POST['workshop_id'] ?: null,
-    'province'=>trim($_POST['province']),
-    'contact'=>trim($_POST['contact']),
-    'email'=>trim($_POST['email']),
+    'province'=>trim($_POST['province'] ?: ''),
+    'contact'=>trim($_POST['contact'] ?: ''),
+    'email'=>trim($_POST['email'] ?: ''),
     'gender'=>$_POST['gender'],
     'attended'=>isset($_POST['attended'])?1:0,
   ];
@@ -30,10 +34,10 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   }
   $data['photo']=$photo;
   if($id){
-    $sql="UPDATE participants SET name=:name,designation=:designation,workshop_id=:workshop_id,province=:province,contact=:contact,email=:email,gender=:gender,attended=:attended,photo=:photo WHERE id=:id";
+    $sql="UPDATE participants SET name=:name,designation=:designation,organization=:organization,teaching_exp=:teaching_exp,qualification=:qualification,age=:age,workshop_id=:workshop_id,province=:province,contact=:contact,email=:email,gender=:gender,attended=:attended,photo=:photo WHERE id=:id";
     $data['id']=$id;
   } else {
-    $sql="INSERT INTO participants (name,designation,workshop_id,province,contact,email,gender,attended,photo) VALUES (:name,:designation,:workshop_id,:province,:contact,:email,:gender,:attended,:photo)";
+    $sql="INSERT INTO participants (name,designation,organization,teaching_exp,qualification,age,workshop_id,province,contact,email,gender,attended,photo) VALUES (:name,:designation,:organization,:teaching_exp,:qualification,:age,:workshop_id,:province,:contact,:email,:gender,:attended,:photo)";
   }
   $pdo->prepare($sql)->execute($data);
   $_SESSION['flash'] = $id ? 'Participant updated' : 'Participant added';
@@ -47,17 +51,21 @@ require_once __DIR__.'/header.php';
   <h3><?= $id?'Edit':'Add New' ?> Participant</h3>
   <form method="post" enctype="multipart/form-data">
     <div class="form-grid">
-      <div class="field"><label>Full Name *</label><input name="name" required value="<?= e($p['name']) ?>"></div>
-      <div class="field"><label>Designation</label><input name="designation" value="<?= e($p['designation']) ?>"></div>
-      <div class="field"><label>Workshop</label><select name="workshop_id"><option value="">-- Select --</option><?php foreach($workshops as $w): ?><option value="<?= $w['id'] ?>" <?= $p['workshop_id']==$w['id']?'selected':'' ?>><?= e($w['title']) ?></option><?php endforeach; ?></select></div>
-      <div class="field"><label>Province</label><input name="province" value="<?= e($p['province']) ?>"></div>
-      <div class="field"><label>Contact</label><input name="contact" value="<?= e($p['contact']) ?>"></div>
-      <div class="field"><label>Email</label><input name="email" type="email" value="<?= e($p['email']) ?>"></div>
-      <div class="field"><label>Gender</label><select name="gender"><?php foreach(['Female','Male'] as $g): ?><option <?= $p['gender']==$g?'selected':'' ?>><?= $g ?></option><?php endforeach; ?></select></div>
-      <div class="field"><label><input type="checkbox" name="attended" <?= $p['attended']?'checked':'' ?>> Attended</label></div>
+      <div class="field"><label>Full Name *</label><input name="name" required value="<?= e($p['name'] ?? '') ?>"></div>
+      <div class="field"><label>Designation</label><input name="designation" value="<?= e($p['designation'] ?? '') ?>"></div>
+      <div class="field"><label>Organization / Institute</label><input name="organization" value="<?= e($p['organization'] ?? '') ?>"></div>
+      <div class="field"><label>Teaching Exp / Clinical Exp</label><input name="teaching_exp" value="<?= e($p['teaching_exp'] ?? '') ?>"></div>
+      <div class="field"><label>Qualification</label><input name="qualification" value="<?= e($p['qualification'] ?? '') ?>"></div>
+      <div class="field"><label>Age</label><input name="age" value="<?= e($p['age'] ?? '') ?>"></div>
+      <div class="field"><label>Workshop</label><select name="workshop_id"><option value="">-- Select --</option><?php foreach($workshops as $w): ?><option value="<?= $w['id'] ?>" <?= ($p['workshop_id'] ?? '')==$w['id']?'selected':'' ?>><?= e($w['title']) ?></option><?php endforeach; ?></select></div>
+      <div class="field"><label>Province/City</label><input name="province" value="<?= e($p['province'] ?? '') ?>"></div>
+      <div class="field"><label>Contact</label><input name="contact" value="<?= e($p['contact'] ?? '') ?>"></div>
+      <div class="field"><label>Email</label><input name="email" type="email" value="<?= e($p['email'] ?? '') ?>"></div>
+      <div class="field"><label>Gender</label><select name="gender"><?php foreach(['Female','Male'] as $g): ?><option <?= ($p['gender'] ?? 'Female')==$g?'selected':'' ?>><?= $g ?></option><?php endforeach; ?></select></div>
+      <div class="field"><label><input type="checkbox" name="attended" <?= ($p['attended'] ?? 1)?'checked':'' ?>> Attended</label></div>
       <div class="field full">
         <label>Photo</label>
-        <?php if($p['photo']): ?><img src="uploads/<?= e($p['photo']) ?>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:6px"><?php endif; ?>
+        <?php if($p['photo'] ?? ''): ?><img src="uploads/<?= e($p['photo']) ?>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:6px"><?php endif; ?>
         <input type="file" name="photo" accept="image/*">
       </div>
     </div>

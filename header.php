@@ -42,6 +42,11 @@
           <?php endif; ?>
         <?php endforeach; ?>
       <?php endif; ?>
+      <?php if (isset($navItems['profile'])): ?>
+        <div class="sb-section">PROFILE</div>
+        <?php $item = $navItems['profile']; ?>
+        <a href="<?= e($item['href']) ?>" class="sb-item <?= $page === 'profile' ? 'active' : '' ?>"><i class='bx <?= e($item['icon']) ?>'></i> <?= e($item['label']) ?></a>
+      <?php endif; ?>
     <?php else: ?>
       <div class="sb-note">Please log in to see navigation.</div>
     <?php endif; ?>
@@ -55,7 +60,7 @@
           <a href="participant_form.php" class="top-btn primary"><i class='bx bx-plus'></i> Add Participant</a>
         <?php endif; ?>
         <?php if ($currentUser): ?>
-          <span class="top-btn user-badge"><i class='bx bx-user-circle'></i> <?= e($currentUser['name']) ?> (<?= e($currentUser['role_name']) ?>)</span>
+          <a href="profile.php" class="top-btn user-badge"><i class='bx bx-user-circle'></i> <?= e($currentUser['name']) ?> (<?= e($currentUser['role_name']) ?>)</a>
           <a href="logout.php" class="top-btn sec">Logout</a>
         <?php else: ?>
           <a href="login.php" class="top-btn sec">Sign In</a>

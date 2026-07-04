@@ -23,7 +23,7 @@ $recent = $pdo->query("SELECT p.*, w.title ws FROM participants p LEFT JOIN work
 <div class="stats-row">
   <div class="stat-card"><div class="stat-label"><i class='bx bx-calendar'></i>Total Workshops</div><div class="stat-val"><?= $totalW ?></div><div class="stat-sub">FDT P1, FDT P2, CC, SC, CM</div></div>
   <div class="stat-card"><div class="stat-label"><i class='bx bx-group'></i>Total Participants</div><div class="stat-val"><?= $totalP ?></div><div class="stat-sub">Across all workshops</div></div>
-  <div class="stat-card"><div class="stat-label"><i class='bx bx-map'></i>Provinces Covered</div><div class="stat-val"><?= $provs ?></div><div class="stat-sub">Punjab, Sindh, KPK...</div></div>
+  <div class="stat-card"><div class="stat-label"><i class='bx bx-map'></i>Cities Covered</div><div class="stat-val"><?= $provs ?></div><div class="stat-sub">Punjab, Sindh, KPK...</div></div>
   <div class="stat-card"><div class="stat-label"><i class='bx bx-check-circle'></i>Attendance Rate</div><div class="stat-val"><?= $rate ?>%</div><div class="stat-sub"><?= $attended ?> attended / <?= $totalP ?> total</div></div>
 </div>
 

@@ -114,7 +114,7 @@ require_once __DIR__.'/header.php';
         </div>
 
         <div class="detail-row">
-          <div class="detail-label">Province</div>
+          <div class="detail-label">Province/City</div>
           <div class="detail-value">
             <?= e($participant['province'] ?: 'Not specified') ?>
           </div>
@@ -158,6 +158,36 @@ require_once __DIR__.'/header.php';
       </div>
     </div>
 
+    <!-- Professional Information Card -->
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <i class='bx bx-briefcase'></i>
+        <h3>Professional Information</h3>
+      </div>
+      <div class="detail-card-body">
+        <div class="detail-row">
+          <div class="detail-label">Organization / Institute</div>
+          <div class="detail-value">
+            <?= e($participant['organization'] ?? '') ?: 'Not specified' ?>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-label">Teaching Exp / Clinical Exp</div>
+          <div class="detail-value">
+            <?= e($participant['teaching_exp'] ?? '') ?: 'Not specified' ?>
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-label">Qualification</div>
+          <div class="detail-value">
+            <?= e($participant['qualification'] ?? '') ?: 'Not specified' ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Additional Information Card -->
     <div class="detail-card">
       <div class="detail-card-header">
@@ -165,6 +195,13 @@ require_once __DIR__.'/header.php';
         <h3>Additional Information</h3>
       </div>
       <div class="detail-card-body">
+        <div class="detail-row">
+          <div class="detail-label">Age</div>
+          <div class="detail-value">
+            <?= e($participant['age'] ?? '') ?: 'Not specified' ?>
+          </div>
+        </div>
+
         <div class="detail-row">
           <div class="detail-label">Gender</div>
           <div class="detail-value">
@@ -323,7 +360,7 @@ require_once __DIR__.'/header.php';
 
 .profile-details-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   width: 100%;
 }
@@ -463,7 +500,7 @@ require_once __DIR__.'/header.php';
   color: var(--muted);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .profile-details-grid {
     grid-template-columns: repeat(2, 1fr);
   }

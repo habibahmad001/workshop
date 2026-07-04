@@ -128,6 +128,10 @@ function auth_get_module_nav_items()
             $items[$module['slug']] = $mapping[$module['slug']];
         }
     }
+    // Always add profile link for logged-in users
+    if (auth_is_logged_in()) {
+        $items['profile'] = ['label' => 'My Profile', 'href' => 'profile.php', 'icon' => 'bx-user-circle'];
+    }
     return $items;
 }
 
