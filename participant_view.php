@@ -10,16 +10,23 @@ if(!$id){
 }
 
 $stmt = $pdo->prepare("
-  SELECT p.*,
-         w.title as workshop_title,
-         w.date as workshop_date,
-         w.location as workshop_location
+  SELECT p.*
   FROM participants p
-  LEFT JOIN workshops w ON w.id = p.workshop_id
   WHERE p.id = ?
 ");
 $stmt->execute([$id]);
 $participant = $stmt->fetch();
+
+// Fetch all workshops for this participant
+$wsStmt = $pdo->prepare("
+  SELECT w.id, w.title, w.date, w.location
+  FROM workshops w
+  INNER JOIN participant_workshops pw ON w.id = pw.workshop_id
+  WHERE pw.participant_id = ?
+  ORDER BY w.title
+");
+$wsStmt->execute([$id]);
+$workshops = $wsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 if(!$participant){
   $_SESSION['flash'] = 'Participant not found';
@@ -58,10 +65,10 @@ require_once __DIR__.'/header.php';
             <i class='bx bx-user'></i>
             <span><?= e($participant['gender']) ?></span>
           </div>
-          <?php if($participant['workshop_title']): ?>
+          <?php if(!empty($workshops)): ?>
           <div class="meta-item">
             <i class='bx bx-calendar-event'></i>
-            <span><?= e($participant['workshop_title']) ?></span>
+            <span><?= count($workshops) ?> Workshop<?= count($workshops) > 1 ? 's' : '' ?></span>
           </div>
           <?php endif; ?>
         </div>
@@ -129,31 +136,43 @@ require_once __DIR__.'/header.php';
         <h3>Workshop Information</h3>
       </div>
       <div class="detail-card-body">
-        <div class="detail-row">
-          <div class="detail-label">Workshop Title</div>
-          <div class="detail-value">
-            <?= e($participant['workshop_title'] ?: 'Not assigned') ?>
-          </div>
-        </div>
+        <?php if(!empty($workshops)): ?>
+          <?php foreach($workshops as $index => $ws): ?>
+            <?php if($index > 0): ?><hr style="margin:12px 0;border:none;border-top:1px dashed var(--border);"><?php endif; ?>
+            <div class="detail-row">
+              <div class="detail-label">Workshop #<?= $index + 1 ?></div>
+              <div class="detail-value">
+                <strong><?= e($ws['title']) ?></strong>
+              </div>
+            </div>
 
-        <?php if($participant['workshop_date']): ?>
-        <div class="detail-row">
-          <div class="detail-label">Workshop Date</div>
-          <div class="detail-value">
-            <i class='bx bx-calendar'></i>
-            <?= date('F j, Y', strtotime($participant['workshop_date'])) ?>
-          </div>
-        </div>
-        <?php endif; ?>
+            <?php if($ws['date']): ?>
+            <div class="detail-row">
+              <div class="detail-label">Date</div>
+              <div class="detail-value">
+                <i class='bx bx-calendar'></i>
+                <?= date('F j, Y', strtotime($ws['date'])) ?>
+              </div>
+            </div>
+            <?php endif; ?>
 
-        <?php if($participant['workshop_location']): ?>
-        <div class="detail-row">
-          <div class="detail-label">Location</div>
-          <div class="detail-value">
-            <i class='bx bx-map'></i>
-            <?= e($participant['workshop_location']) ?>
+            <?php if($ws['location']): ?>
+            <div class="detail-row">
+              <div class="detail-label">Location</div>
+              <div class="detail-value">
+                <i class='bx bx-map'></i>
+                <?= e($ws['location']) ?>
+              </div>
+            </div>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <div class="detail-row">
+            <div class="detail-label">Workshops</div>
+            <div class="detail-value">
+              <span class="detail-empty">No workshops assigned</span>
+            </div>
           </div>
-        </div>
         <?php endif; ?>
       </div>
     </div>

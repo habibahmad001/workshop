@@ -4,12 +4,24 @@ require_once __DIR__.'/db.php';
 auth_require_module('participants');
 $id = (int)($_GET['id'] ?? 0);
 $p = ['id'=>0,'name'=>'','designation'=>'','organization'=>'','teaching_exp'=>'','qualification'=>'','age'=>'','workshop_id'=>'','province'=>'','contact'=>'','email'=>'','gender'=>'Female','attended'=>1,'photo'=>''];
+
+// Fetch participant data
 if($id){
   $st=$pdo->prepare("SELECT * FROM participants WHERE id=?"); $st->execute([$id]);
   $p = $st->fetch() ?: $p;
+
+  // Fetch selected workshops for this participant
+  $wsSt = $pdo->prepare("SELECT workshop_id FROM participant_workshops WHERE participant_id=?");
+  $wsSt->execute([$id]);
+  $selectedWorkshops = $wsSt->fetchAll(PDO::FETCH_COLUMN);
+} else {
+  $selectedWorkshops = [];
 }
 
 if($_SERVER['REQUEST_METHOD']==='POST'){
+  // Handle workshop selections (multi-select)
+  $workshopIds = $_POST['workshop_ids'] ?? [];
+
   $data=[
     'name'=>trim($_POST['name']),
     'designation'=>trim($_POST['designation'] ?: ''),
@@ -17,7 +29,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     'teaching_exp'=>trim($_POST['teaching_exp'] ?: ''),
     'qualification'=>trim($_POST['qualification'] ?: ''),
     'age'=>trim($_POST['age'] ?: ''),
-    'workshop_id'=>$_POST['workshop_id'] ?: null,
+    'workshop_id'=>!empty($workshopIds) ? $workshopIds[0] : null, // Store first workshop as primary
     'province'=>trim($_POST['province'] ?: ''),
     'contact'=>trim($_POST['contact'] ?: ''),
     'email'=>trim($_POST['email'] ?: ''),
@@ -40,6 +52,21 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $sql="INSERT INTO participants (name,designation,organization,teaching_exp,qualification,age,workshop_id,province,contact,email,gender,attended,photo) VALUES (:name,:designation,:organization,:teaching_exp,:qualification,:age,:workshop_id,:province,:contact,:email,:gender,:attended,:photo)";
   }
   $pdo->prepare($sql)->execute($data);
+
+  // Get the participant ID (for new inserts)
+  $participantId = $id ?: $pdo->lastInsertId();
+
+  // Delete existing workshop relationships
+  $pdo->prepare("DELETE FROM participant_workshops WHERE participant_id=?")->execute([$participantId]);
+
+  // Insert new workshop relationships
+  if(!empty($workshopIds)){
+    $wsInsert = $pdo->prepare("INSERT INTO participant_workshops (participant_id, workshop_id) VALUES (?, ?)");
+    foreach($workshopIds as $wsId){
+      $wsInsert->execute([$participantId, $wsId]);
+    }
+  }
+
   $_SESSION['flash'] = $id ? 'Participant updated' : 'Participant added';
   redirect('participants.php');
 }
@@ -57,7 +84,16 @@ require_once __DIR__.'/header.php';
       <div class="field"><label>Teaching Exp / Clinical Exp</label><input name="teaching_exp" value="<?= e($p['teaching_exp'] ?? '') ?>"></div>
       <div class="field"><label>Qualification</label><input name="qualification" value="<?= e($p['qualification'] ?? '') ?>"></div>
       <div class="field"><label>Age</label><input name="age" value="<?= e($p['age'] ?? '') ?>"></div>
-      <div class="field"><label>Workshop</label><select name="workshop_id"><option value="">-- Select --</option><?php foreach($workshops as $w): ?><option value="<?= $w['id'] ?>" <?= ($p['workshop_id'] ?? '')==$w['id']?'selected':'' ?>><?= e($w['title']) ?></option><?php endforeach; ?></select></div>
+      <div class="field"><label>Workshops (Hold Ctrl/Cmd to select multiple)</label>
+        <select name="workshop_ids[]" multiple size="4" style="min-height:120px;">
+          <?php foreach($workshops as $w): ?>
+            <option value="<?= $w['id'] ?>" <?= in_array($w['id'], $selectedWorkshops) ? 'selected' : '' ?>>
+              <?= e($w['title']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <small style="color:var(--muted)">Hold Ctrl (Windows) or Cmd (Mac) to select multiple workshops</small>
+      </div>
       <div class="field"><label>Province/City</label><input name="province" value="<?= e($p['province'] ?? '') ?>"></div>
       <div class="field"><label>Contact</label><input name="contact" value="<?= e($p['contact'] ?? '') ?>"></div>
       <div class="field"><label>Email</label><input name="email" type="email" value="<?= e($p['email'] ?? '') ?>"></div>
